@@ -137,7 +137,7 @@ function createQuizTex() {
 
     }
 
-    let body = `\\documentclass{book}
+    let body = `\\documentclass[oneside]{book}
 \\usepackage[utf8]{inputenc}
 \\usepackage[margin=0.25in]{geometry}
 \\usepackage{kotex}
@@ -154,7 +154,6 @@ function createQuizTex() {
 \\renewcommand{\\partname}{}
 \\renewcommand{\\chaptername}{}
 \\renewcommand{\\contentsname}{목차}
-\\let\\cleardoublepage=\\clearpage
 \\allowdisplaybreaks
 \\titleformat{\\chapter}[display]
   {\\Huge\\bfseries}
