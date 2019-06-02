@@ -40,6 +40,9 @@ let irreducibleMonicQuadraticGenerator = irreducibleMonicPolynomialGenerator(2);
 let irreducibleQuadraticGenerator = irreduciblePolynomialGenerator(2);
 let irreducibleMonicCubicGenerator = irreducibleMonicPolynomialGenerator(3);
 let irreducibleCubicGenerator = irreduciblePolynomialGenerator(3);
+let irreducibleMonicQuarticGenerator = irreducibleMonicPolynomialGenerator(4);
+let irreducibleQuarticGenerator = irreduciblePolynomialGenerator(4);
+
 
 let monicHardQuarticGenerator = (function* () {
     let buffer = [];
@@ -155,7 +158,35 @@ let generalHardSexticGenerator2 = (function* () {
     }
 })();
 
-let monicHardSepticGenerator = (function* () {
+let monicHardSexticGenerator3 = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleMonicQuadraticGenerator.next().value,
+            factor2 = irreducibleMonicQuarticGenerator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
+    }
+})();
+
+let generalHardSexticGenerator3 = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleQuadraticGenerator.next().value,
+            factor2 = irreducibleQuarticGenerator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (current[0] === 1 || buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
+    }
+})();
+
+let monicHardSepticGenerator1 = (function* () {
     let buffer = [];
 
     while(true) {
@@ -170,7 +201,7 @@ let monicHardSepticGenerator = (function* () {
     }
 })();
 
-let generalHardSepticGenerator = (function* () {
+let generalHardSepticGenerator1 = (function* () {
     let buffer = [];
 
     while(true) {
@@ -182,6 +213,34 @@ let generalHardSepticGenerator = (function* () {
             continue;
         buffer.push(current.toIdentifiableString());
         yield { result: current, factor: [factor1, factor2, factor3] };
+    }
+})();
+
+let monicHardSepticGenerator2 = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleMonicCubicGenerator.next().value,
+            factor2 = irreducibleMonicQuarticGenerator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
+    }
+})();
+
+let generalHardSepticGenerator2 = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleCubicGenerator.next().value,
+            factor2 = irreducibleQuarticGenerator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (current[0] === 1 || buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
     }
 })();
 
@@ -197,8 +256,12 @@ function createQuizTex() {
         monicSextic2LaTeXStrings = [], generalSextic2LaTeXStrings = [],
         monicSextic1SolLaTeXStrings = [], generalSextic1SolLaTeXStrings = [],
         monicSextic2SolLaTeXStrings = [], generalSextic2SolLaTeXStrings = [],
-        monicSepticLaTeXStrings = [], generalSepticLaTeXStrings = [],
-        monicSepticSolLaTeXStrings = [], generalSepticSolLaTeXStrings = [];
+        monicSextic3LaTeXStrings = [], generalSextic3LaTeXStrings = [],
+        monicSextic3SolLaTeXStrings = [], generalSextic3SolLaTeXStrings = [],
+        monicSeptic1LaTeXStrings = [], generalSeptic1LaTeXStrings = [],
+        monicSeptic2LaTeXStrings = [], generalSeptic2LaTeXStrings = [],
+        monicSeptic1SolLaTeXStrings = [], generalSeptic1SolLaTeXStrings = [],
+        monicSeptic2SolLaTeXStrings = [], generalSeptic2SolLaTeXStrings = [];
 
     for (let i = 0; i < 60; i++) {
         let monicQuartic = [ monicHardQuarticGenerator.next().value,
@@ -238,10 +301,16 @@ function createQuizTex() {
             monicHardSexticGenerator2.next().value];
         let generalSextic2 = [ generalHardSexticGenerator2.next().value,
             generalHardSexticGenerator2.next().value];
+        let monicSextic3 = [ monicHardSexticGenerator3.next().value,
+            monicHardSexticGenerator3.next().value];
+        let generalSextic3 = [ generalHardSexticGenerator3.next().value,
+            generalHardSexticGenerator3.next().value];
         monicSextic1LaTeXStrings.push(monicSextic1.map(e => e.result.toLaTeXString()).join("&&"));
         generalSextic1LaTeXStrings.push(generalSextic1.map(e => e.result.toLaTeXString()).join("&&"));
         monicSextic2LaTeXStrings.push(monicSextic2.map(e => e.result.toLaTeXString()).join("&&"));
         generalSextic2LaTeXStrings.push(generalSextic2.map(e => e.result.toLaTeXString()).join("&&"));
+        monicSextic3LaTeXStrings.push(monicSextic3.map(e => e.result.toLaTeXString()).join("&&"));
+        generalSextic3LaTeXStrings.push(generalSextic3.map(e => e.result.toLaTeXString()).join("&&"));
         monicSextic1SolLaTeXStrings.push(monicSextic1.map(e => e.factor.map(f => '('
             + f.toLaTeXString()
             + ')').join('')).join("&&"));
@@ -254,17 +323,35 @@ function createQuizTex() {
         generalSextic2SolLaTeXStrings.push(generalSextic2.map(e => e.factor.map(f => '('
             + f.toLaTeXString()
             + ')').join('')).join("&&"));
-
-        let monicSeptic = [ monicHardSepticGenerator.next().value,
-            monicHardSepticGenerator.next().value];
-        let generalSeptic = [ generalHardSepticGenerator.next().value,
-            generalHardSepticGenerator.next().value];
-        monicSepticLaTeXStrings.push(monicSeptic.map(e => e.result.toLaTeXString()).join("&&"));
-        generalSepticLaTeXStrings.push(generalSeptic.map(e => e.result.toLaTeXString()).join("&&"));
-        monicSepticSolLaTeXStrings.push(monicSeptic.map(e => e.factor.map(f => '('
+        monicSextic3SolLaTeXStrings.push(monicSextic3.map(e => e.factor.map(f => '('
             + f.toLaTeXString()
             + ')').join('')).join("&&"));
-        generalSepticSolLaTeXStrings.push(generalSeptic.map(e => e.factor.map(f => '('
+        generalSextic3SolLaTeXStrings.push(generalSextic3.map(e => e.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join('')).join("&&"));
+
+        let monicSeptic1 = [ monicHardSepticGenerator1.next().value,
+            monicHardSepticGenerator1.next().value];
+        let generalSeptic1 = [ generalHardSepticGenerator1.next().value,
+            generalHardSepticGenerator1.next().value];
+        monicSeptic1LaTeXStrings.push(monicSeptic1.map(e => e.result.toLaTeXString()).join("&&"));
+        generalSeptic1LaTeXStrings.push(generalSeptic1.map(e => e.result.toLaTeXString()).join("&&"));
+        monicSeptic1SolLaTeXStrings.push(monicSeptic1.map(e => e.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join('')).join("&&"));
+        generalSeptic1SolLaTeXStrings.push(generalSeptic1.map(e => e.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join('')).join("&&"));
+        let monicSeptic2 = [ monicHardSepticGenerator2.next().value,
+            monicHardSepticGenerator2.next().value];
+        let generalSeptic2 = [ generalHardSepticGenerator2.next().value,
+            generalHardSepticGenerator2.next().value];
+        monicSeptic2LaTeXStrings.push(monicSeptic2.map(e => e.result.toLaTeXString()).join("&&"));
+        generalSeptic2LaTeXStrings.push(generalSeptic2.map(e => e.result.toLaTeXString()).join("&&"));
+        monicSeptic2SolLaTeXStrings.push(monicSeptic2.map(e => e.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join('')).join("&&"));
+        generalSeptic2SolLaTeXStrings.push(generalSeptic2.map(e => e.factor.map(f => '('
             + f.toLaTeXString()
             + ')').join('')).join("&&"));
 
@@ -295,7 +382,7 @@ function createQuizTex() {
   {\\thechapter.\\ }
 \\pagestyle{empty}
 
-\\title{최고난도 인수분해 1440제}
+\\title{최고난도 인수분해 1920제}
 \\author{}
 \\date{}
 
@@ -347,6 +434,12 @@ ${monicSextic1LaTeXStrings.join("\\\\\n")}
 ${monicSextic2LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
+\\section{일계수 육차식 3형}
+
+\\begin{flalign*}
+${monicSextic3LaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
 \\section{일계수가 아닌 육차식 1형}
 
 \\begin{flalign*}
@@ -359,18 +452,37 @@ ${generalSextic1LaTeXStrings.join("\\\\\n")}
 ${generalSextic2LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
-\\chapter{칠차식의 인수분해}
-
-\\section{일계수 칠차식}
+\\section{일계수가 아닌 육차식 3형}
 
 \\begin{flalign*}
-${monicSepticLaTeXStrings.join("\\\\\n")}
+${generalSextic3LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
-\\section{일계수가 아닌 칠차식}
+\\chapter{칠차식의 인수분해}
+
+\\section{일계수 칠차식 1형}
 
 \\begin{flalign*}
-${generalSepticLaTeXStrings.join("\\\\\n")}
+${monicSeptic1LaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수 칠차식 2형}
+
+\\begin{flalign*}
+${monicSeptic2LaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+
+\\section{일계수가 아닌 칠차식 1형}
+
+\\begin{flalign*}
+${generalSeptic1LaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수가 아닌 칠차식 2형}
+
+\\begin{flalign*}
+${generalSeptic2LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
 \\part{정답}
@@ -417,6 +529,12 @@ ${monicSextic1SolLaTeXStrings.join("\\\\\n")}
 ${monicSextic2SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
+\\section{일계수 육차식 3형}
+
+\\begin{flalign*}
+${monicSextic3SolLaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
 \\section{일계수가 아닌 육차식 1형}
 
 \\begin{flalign*}
@@ -429,18 +547,36 @@ ${generalSextic1SolLaTeXStrings.join("\\\\\n")}
 ${generalSextic2SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
-\\chapter{칠차식의 인수분해}
-
-\\section{일계수 칠차식}
+\\section{일계수가 아닌 육차식 3형}
 
 \\begin{flalign*}
-${monicSepticSolLaTeXStrings.join("\\\\\n")}
+${generalSextic3SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
-\\section{일계수가 아닌 칠차식}
+\\chapter{칠차식의 인수분해}
+
+\\section{일계수 칠차식 1형}
 
 \\begin{flalign*}
-${generalSepticSolLaTeXStrings.join("\\\\\n")}
+${monicSeptic1SolLaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수 칠차식 2형}
+
+\\begin{flalign*}
+${monicSeptic2SolLaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수가 아닌 칠차식 1형}
+
+\\begin{flalign*}
+${generalSeptic1SolLaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수가 아닌 칠차식 2형}
+
+\\begin{flalign*}
+${generalSeptic2SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
 \\end{document}
