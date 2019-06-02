@@ -44,6 +44,7 @@ let irreducibleMonicQuarticGenerator = irreducibleMonicPolynomialGenerator(4);
 let irreducibleQuarticGenerator = irreduciblePolynomialGenerator(4);
 let irreducibleMonicQuinticGenerator = irreducibleMonicPolynomialGenerator(5);
 let irreducibleQuinticGenerator = irreduciblePolynomialGenerator(5);
+let irreducibleMonic50Generator = irreducibleMonicPolynomialGenerator(50);
 
 
 let monicHardQuarticGenerator = (function* () {
@@ -274,6 +275,20 @@ let generalHardSepticGenerator3 = (function* () {
     }
 })();
 
+let monicHard100Generator = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleMonic50Generator.next().value,
+            factor2 = irreducibleMonic50Generator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
+    }
+})();
+
 
 let out = fs.createWriteStream("./quiz" + Date.now().toLocaleString() + ".pdf");
 
@@ -293,7 +308,8 @@ function createQuizTex() {
         monicSeptic1SolLaTeXStrings = [], generalSeptic1SolLaTeXStrings = [],
         monicSeptic2SolLaTeXStrings = [], generalSeptic2SolLaTeXStrings = [],
         monicSeptic3LaTeXStrings = [], generalSeptic3LaTeXStrings = [],
-        monicSeptic3SolLaTeXStrings = [], generalSeptic3SolLaTeXStrings = [];
+        monicSeptic3SolLaTeXStrings = [], generalSeptic3SolLaTeXStrings = [],
+        monic100LaTeXStrings = [], monic100SolLaTeXStrings = [];
 
     for (let i = 0; i < 60; i++) {
         let monicQuartic = [ monicHardQuarticGenerator.next().value,
@@ -401,12 +417,21 @@ function createQuizTex() {
 
     }
 
+    for (let i = 0; i < 3; i++) {
+        let monic100 = monicHard100Generator.next().value;
+        monic100LaTeXStrings.push(monic100.result.toLaTeXString());
+        monic100SolLaTeXStrings.push(monic100.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join(''));
+    }
+
     let body = `\\documentclass[oneside]{book}
 \\usepackage[utf8]{inputenc}
 \\usepackage[margin=0.25in]{geometry}
 \\usepackage{kotex}
 \\usepackage{amsfonts}
 \\usepackage{amsmath}
+\\usepackage{breqn}
 \\usepackage{mathtools}
 \\usepackage{amsthm}
 \\usepackage{amssymb}
@@ -426,7 +451,7 @@ function createQuizTex() {
   {\\thechapter.\\ }
 \\pagestyle{empty}
 
-\\title{최고난도 인수분해 2160제}
+\\title{최고난도 인수분해 2163제}
 \\author{}
 \\date{}
 
@@ -540,6 +565,12 @@ ${generalSeptic2LaTeXStrings.join("\\\\\n")}
 ${generalSeptic3LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
+\\chapter{특집: 백차식 3제}
+
+\\begin{dmath*}
+${monic100LaTeXStrings.join("\\\\\n")}
+\\end{dmath*}
+
 \\part{정답}
 
 \\chapter{사차식의 인수분해}
@@ -646,11 +677,18 @@ ${generalSeptic2SolLaTeXStrings.join("\\\\\n")}
 ${generalSeptic3SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
+\\chapter{특집: 백차식 3제}
+
+\\begin{dmath*}
+${monic100SolLaTeXStrings.join("\\\\\n")}
+\\end{dmath*}
+
 \\end{document}
 `;
+    /*console.log(body);*/
     let pdf = latex(body);
     pdf.pipe(out);
-    pdf.on("finish", () => console.log("FINISH"))
+    pdf.on("finish", () => console.log("FINISH"));
 }
 
 console.assert(new IntegerPolynomial(45,- 120,+ 57,- 152 , + 18 , - 48
