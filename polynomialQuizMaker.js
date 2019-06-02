@@ -42,6 +42,8 @@ let irreducibleMonicCubicGenerator = irreducibleMonicPolynomialGenerator(3);
 let irreducibleCubicGenerator = irreduciblePolynomialGenerator(3);
 let irreducibleMonicQuarticGenerator = irreducibleMonicPolynomialGenerator(4);
 let irreducibleQuarticGenerator = irreduciblePolynomialGenerator(4);
+let irreducibleMonicQuinticGenerator = irreducibleMonicPolynomialGenerator(5);
+let irreducibleQuinticGenerator = irreduciblePolynomialGenerator(5);
 
 
 let monicHardQuarticGenerator = (function* () {
@@ -244,6 +246,34 @@ let generalHardSepticGenerator2 = (function* () {
     }
 })();
 
+let monicHardSepticGenerator3 = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleMonicQuadraticGenerator.next().value,
+            factor2 = irreducibleMonicQuinticGenerator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
+    }
+})();
+
+let generalHardSepticGenerator3 = (function* () {
+    let buffer = [];
+
+    while(true) {
+        let factor1 = irreducibleQuadraticGenerator.next().value,
+            factor2 = irreducibleQuinticGenerator.next().value;
+        let current = IntegerPolynomial.multiply(factor1, factor2);
+        if (current[0] === 1 || buffer.includes(current.toIdentifiableString()))
+            continue;
+        buffer.push(current.toIdentifiableString());
+        yield { result: current, factor: [factor1, factor2] };
+    }
+})();
+
 
 let out = fs.createWriteStream("./quiz" + Date.now().toLocaleString() + ".pdf");
 
@@ -261,7 +291,9 @@ function createQuizTex() {
         monicSeptic1LaTeXStrings = [], generalSeptic1LaTeXStrings = [],
         monicSeptic2LaTeXStrings = [], generalSeptic2LaTeXStrings = [],
         monicSeptic1SolLaTeXStrings = [], generalSeptic1SolLaTeXStrings = [],
-        monicSeptic2SolLaTeXStrings = [], generalSeptic2SolLaTeXStrings = [];
+        monicSeptic2SolLaTeXStrings = [], generalSeptic2SolLaTeXStrings = [],
+        monicSeptic3LaTeXStrings = [], generalSeptic3LaTeXStrings = [],
+        monicSeptic3SolLaTeXStrings = [], generalSeptic3SolLaTeXStrings = [];
 
     for (let i = 0; i < 60; i++) {
         let monicQuartic = [ monicHardQuarticGenerator.next().value,
@@ -354,6 +386,18 @@ function createQuizTex() {
         generalSeptic2SolLaTeXStrings.push(generalSeptic2.map(e => e.factor.map(f => '('
             + f.toLaTeXString()
             + ')').join('')).join("&&"));
+        let monicSeptic3 = [ monicHardSepticGenerator3.next().value,
+            monicHardSepticGenerator3.next().value];
+        let generalSeptic3 = [ generalHardSepticGenerator3.next().value,
+            generalHardSepticGenerator3.next().value];
+        monicSeptic3LaTeXStrings.push(monicSeptic3.map(e => e.result.toLaTeXString()).join("&&"));
+        generalSeptic3LaTeXStrings.push(generalSeptic3.map(e => e.result.toLaTeXString()).join("&&"));
+        monicSeptic3SolLaTeXStrings.push(monicSeptic3.map(e => e.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join('')).join("&&"));
+        generalSeptic3SolLaTeXStrings.push(generalSeptic3.map(e => e.factor.map(f => '('
+            + f.toLaTeXString()
+            + ')').join('')).join("&&"));
 
     }
 
@@ -382,7 +426,7 @@ function createQuizTex() {
   {\\thechapter.\\ }
 \\pagestyle{empty}
 
-\\title{최고난도 인수분해 1920제}
+\\title{최고난도 인수분해 2160제}
 \\author{}
 \\date{}
 
@@ -472,6 +516,11 @@ ${monicSeptic1LaTeXStrings.join("\\\\\n")}
 ${monicSeptic2LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
+\\section{일계수 칠차식 3형}
+
+\\begin{flalign*}
+${monicSeptic3LaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
 
 \\section{일계수가 아닌 칠차식 1형}
 
@@ -483,6 +532,12 @@ ${generalSeptic1LaTeXStrings.join("\\\\\n")}
 
 \\begin{flalign*}
 ${generalSeptic2LaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수가 아닌 칠차식 3형}
+
+\\begin{flalign*}
+${generalSeptic3LaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
 \\part{정답}
@@ -567,6 +622,12 @@ ${monicSeptic1SolLaTeXStrings.join("\\\\\n")}
 ${monicSeptic2SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
+\\section{일계수 칠차식 3형}
+
+\\begin{flalign*}
+${monicSeptic3SolLaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
 \\section{일계수가 아닌 칠차식 1형}
 
 \\begin{flalign*}
@@ -577,6 +638,12 @@ ${generalSeptic1SolLaTeXStrings.join("\\\\\n")}
 
 \\begin{flalign*}
 ${generalSeptic2SolLaTeXStrings.join("\\\\\n")}
+\\end{flalign*}
+
+\\section{일계수가 아닌 칠차식 3형}
+
+\\begin{flalign*}
+${generalSeptic3SolLaTeXStrings.join("\\\\\n")}
 \\end{flalign*}
 
 \\end{document}
