@@ -295,7 +295,7 @@ function createQuizTex() {
   {\\thechapter.\\ }
 \\pagestyle{empty}
 
-\\title{최고난도 인수분해 1680제}
+\\title{최고난도 인수분해 1440제}
 \\author{}
 \\date{}
 
